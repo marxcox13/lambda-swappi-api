@@ -1,0 +1,46 @@
+service: lambda-swappi-api
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource:
+        - arn:aws:dynamodb:us-east-1:123802843498:table/peopleTable 
+
+plugins:
+  - serverless-offline
+  - serverless-auto-swagger
+
+functions:
+  addPeople:
+    handler: src/endpoints.addPeople
+    events:
+      - httpApi:
+          path: /peoples
+          method: post
+  getPeople:
+    handler: src/endpoints.getPeople
+    events:
+      - httpApi:
+          path: /peoples/{number}
+          method: get
+
+
+	
+resources:
+  Resources:
+    peopleTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: peopleTable
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
